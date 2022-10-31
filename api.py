@@ -62,16 +62,24 @@ def get_vm_list():
 
 def get_vm_info(vm_id):
     """ This function is used to get the info of a VM """
-    response = requests.request(
-        "GET", VMREST_URL + "/" + vm_id, headers=HEADERS, data=PAYLOAD)
-    return response.json()
+    try:
+        vm_info_url = f'{VMREST_URL}/{vm_id}'
+        response = requests.request(
+            "GET", vm_info_url, headers=HEADERS, data=PAYLOAD)
+        return print(json.dumps(response.json(), indent=4, sort_keys=True))
+    except requests.exceptions.JSONDecodeError:
+        return print("VM not found or url is invalid")
 
 
 def get_vm_power_state(vm_id):
     """This function is used to get the power state of a VM"""
-    response = requests.request(
-        "GET", VMREST_URL + "/" + vm_id + "/power", headers=HEADERS, data=PAYLOAD)
-    return response.json()
+    try:
+        vm_power_state = f'{VMREST_URL}/{vm_id}/power'
+        response = requests.request(
+            "GET", vm_power_state, headers=HEADERS, data=PAYLOAD)
+        return print(json.dumps(response.json(), indent=4, sort_keys=True))
+    except requests.exceptions.JSONDecodeError:
+        return print("VM not found or url is invalid")
 
 
 if __name__ == '__main__':
@@ -80,6 +88,10 @@ if __name__ == '__main__':
             enable_fusion_api(sys.argv[2])
         if "--get-vm-list" in sys.argv[1]:
             get_vm_list()
+        if "--get-vm-info" in sys.argv[1]:
+            get_vm_info(sys.argv[2])
+        if "--get-vm-power-state" in sys.argv[1]:
+            get_vm_power_state(sys.argv[2])
     except ConnectionRefusedError:
         sys.exit("\nThe host is not responding or don't exist\n")
     except requests.exceptions.ConnectionError:
