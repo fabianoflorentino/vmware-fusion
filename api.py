@@ -16,6 +16,7 @@ HEADERS = {
     'Accept': 'application/vnd.vmware.vmw.rest-v1+json',
     'Authorization': VMREST_AUTH
 }
+VM_POWER_OPERATION = ["on", "off", "shutdown", "suspend", "pause", "unpause"]
 
 
 def enable_fusion_api(function):
@@ -82,7 +83,46 @@ def get_vm_power_state(vm_id):
         return print("VM not found or url is invalid")
 
 
-if __name__ == '__main__':
+def vm_power_operation(vm_id, status):
+    """
+    This function is used to VM power operations
+    status: on, off, shutdown, suspend, pause, unpause
+    """
+    HEADERS['Content-Type'] = 'application/vnd.vmware.vmw.rest-v1+json'
+
+    try:
+        vm_power_status_url = f'{VMREST_URL}/{vm_id}/power'
+        for stt in VM_POWER_OPERATION:
+            if stt == status:
+                payload = status
+                response = requests.request(
+                    "PUT", vm_power_status_url, headers=HEADERS, data=payload)
+        return print(json.dumps(response.json(), indent=4, sort_keys=True))
+    except requests.exceptions.JSONDecodeError:
+        return print("VM not found or status is invalid")
+    except UnboundLocalError:
+        return print("Status is not found or invalid status")
+
+
+def help():
+    HELP = """
+Usage: python3 api.py [OPTIONS]
+
+Options:
+    --api [enable|disable]             Enable or disable the VMware Fusion API
+    --get-vm-list                      Get the list of VMs
+    --get-vm-info [vm_id]              Get the info of a VM
+    --get-vm-power-state [vm_id]       Get the power state of a VM
+    --power-status [vm_id] [status]    VM power operations
+                                        status: on, off, shutdown, suspend, pause, unpause
+    --help, -h                         Show this help message and exit
+"""
+
+    return print(HELP)
+
+
+def main():
+    """Main function"""
     try:
         if "--api" in sys.argv[1]:
             enable_fusion_api(sys.argv[2])
@@ -92,11 +132,19 @@ if __name__ == '__main__':
             get_vm_info(sys.argv[2])
         if "--get-vm-power-state" in sys.argv[1]:
             get_vm_power_state(sys.argv[2])
+        if "--power-status" in sys.argv[1]:
+            vm_power_operation(sys.argv[2], sys.argv[3])
+        if "--help" in sys.argv[1] or "-h" in sys.argv[1]:
+            help()
     except ConnectionRefusedError:
         sys.exit("\nThe host is not responding or don't exist\n")
     except requests.exceptions.ConnectionError:
         print(sys.exit("\nError connecting to the host\n"))
     except IndexError:
-        sys.exit("\nPlease, check the arguments\n")
+        sys.exit(f"\n{help()}\n")
     except KeyboardInterrupt:
         sys.exit("\nExiting...")
+
+
+if __name__ == '__main__':
+    main()
