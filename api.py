@@ -106,6 +106,13 @@ def vm_power_operation(vm_id, status):
 
 def help():
     HELP = """
+Pre-requisites:
+    export VMREST_URL=http://localhost:8697/api/vms
+    export VMREST_AUTH=<AUTH_TOKEN>
+
+    Ex. echo -n "username:password" | base64
+        export VMREST_AUTH=Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+
 Usage: python3 api.py [OPTIONS]
 
 Options:
