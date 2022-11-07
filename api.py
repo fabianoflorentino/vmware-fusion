@@ -22,7 +22,7 @@ VM_POWER_OPERATION = ["on", "off", "shutdown", "suspend", "pause", "unpause"]
 def enable_fusion_api(function):
     """This function is used to enable or disable the Fusion API"""
     try:
-        if VMREST_URL:
+        if VMREST_URL and VMREST_AUTH:
             if function == "enable":
                 try:
                     cmd_ena_api = "nohup vmrest > /tmp/vmrest.out 2>&1 &"
@@ -46,8 +46,12 @@ def enable_fusion_api(function):
                 except ValueError:
                     msg = "VMware Fusion API already disabled"
         else:
-            msg = "VMREST_URL not set, please set it in the environment variable: \
-                   \nEx. export VMREST_URL=http://127.0.0.1:8697/api/vms"
+            msg = "VMREST_URL or nVMREST_AUTH is not set, \
+                    \nplease set it in the environment variable: \
+                    \nEx: \
+                    \n export VMREST_URL=http://127.0.0.1:8697/api/vms \
+                    \n export VMREST_AUTH=<AUTH TOKEN> \
+                    \n you can use python3 api.py -h or --help to get more info"
     except ValueError:
         msg = "VMware Fusion API is not enabled"
 
@@ -104,8 +108,9 @@ def vm_power_operation(vm_id, status):
         return print("Status is not found or invalid status")
 
 
-def help():
-    HELP = """
+def help_api():
+    """Help function"""
+    msg = """
 Pre-requisites:
     export VMREST_URL=http://localhost:8697/api/vms
     export VMREST_AUTH=<AUTH_TOKEN>
@@ -125,7 +130,7 @@ Options:
     --help, -h                         Show this help message and exit
 """
 
-    return print(HELP)
+    return print(msg)
 
 
 def main():
@@ -142,7 +147,7 @@ def main():
         if "--power-status" in sys.argv[1]:
             vm_power_operation(sys.argv[2], sys.argv[3])
         if "--help" in sys.argv[1] or "-h" in sys.argv[1]:
-            help()
+            help_api()
     except ConnectionRefusedError:
         sys.exit("\nThe host is not responding or don't exist\n")
     except requests.exceptions.ConnectionError:
