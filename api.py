@@ -1,7 +1,7 @@
 """
 Script to interact with VMware Fusion API to control VMs.
 """
-# -*- coding: utf-8 -*-
+#  ~*~ coding: utf-8 ~*~
 
 import os
 import json
